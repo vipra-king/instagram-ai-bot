@@ -1,0 +1,5 @@
+node_modules/
+.env
+instagram.json
+playwright-report/
+test-results/

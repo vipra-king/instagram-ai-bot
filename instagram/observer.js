@@ -8,6 +8,9 @@ async function watchNewMessages(page, friendName, onMessage) {
 
     if (!chat) return;
 
+    // Remember messages we've already emitted
+    const seen = new Set();
+
     function parseMessage(group) {
       const allTexts = [...group.querySelectorAll("*")]
         .map((n) => n.textContent?.trim())
@@ -19,37 +22,37 @@ async function watchNewMessages(page, friendName, onMessage) {
 
       if (unique.length === 0) return null;
 
+      let message;
+
       if (unique[0].startsWith("You replied to")) {
-        return {
+        message = {
           sender: "me",
           text: unique.at(-1),
           replyTo: unique.length >= 3 ? unique[unique.length - 2] : null,
         };
-      }
-
-      if (unique[0].includes("replied to you")) {
-        return {
+      } else if (unique[0].includes("replied to you")) {
+        message = {
           sender: friendName,
           text: unique.at(-1),
           replyTo: unique.length >= 3 ? unique[unique.length - 2] : null,
         };
-      }
-
-      if (unique.length > 1) {
+      } else if (unique.length > 1) {
         const reactedWith =
           unique[2] && !unique[2].startsWith("IGD ") ? unique[2] : undefined;
 
-        return {
+        message = {
           sender: hasProfile ? friendName : "me",
           text: unique[1],
           ...(reactedWith && { reactedWith }),
         };
+      } else {
+        message = {
+          sender: hasProfile ? friendName : "me",
+          text: unique[0],
+        };
       }
 
-      return {
-        sender: hasProfile ? friendName : "me",
-        text: unique[0],
-      };
+      return message;
     }
 
     const observer = new MutationObserver((mutations) => {
@@ -66,6 +69,16 @@ async function watchNewMessages(page, friendName, onMessage) {
           const message = parseMessage(group);
 
           if (!message) continue;
+
+          // Ignore my own messages
+          if (message.sender === "me") continue;
+
+          // Ignore duplicates
+          const key = `${message.sender}:${message.text}`;
+
+          if (seen.has(key)) continue;
+
+          seen.add(key);
 
           window.onInstagramMessage(message);
         }

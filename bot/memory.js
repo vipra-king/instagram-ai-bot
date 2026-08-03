@@ -1,44 +1,80 @@
 class Memory {
-  constructor(initialMemory = {}) {
-    this.memory = { ...initialMemory };
+  constructor({
+    profile = {},
+    style = {},
+    habits = {},
+    phrases = {},
+    examples = [],
+  } = {}) {
+    this.profile = profile;
+    this.style = style;
+    this.habits = habits;
+    this.phrases = phrases;
+    this.examples = examples;
   }
 
-  set(key, value) {
-    this.memory[key] = value;
+  getProfile() {
+    return this.profile;
   }
 
-  get(key) {
-    return this.memory[key];
+  getStyle() {
+    return this.style;
   }
 
-  has(key) {
-    return key in this.memory;
+  getHabits() {
+    return this.habits;
   }
 
-  remove(key) {
-    delete this.memory[key];
+  getPhrases() {
+    return this.phrases;
   }
 
-  clear() {
-    this.memory = {};
+  getExamples() {
+    return this.examples;
   }
 
-  getAll() {
-    return { ...this.memory };
+  setProfile(profile) {
+    this.profile = profile;
   }
 
-  update(data) {
-    Object.assign(this.memory, data);
+  setStyle(style) {
+    this.style = style;
   }
 
-  toPrompt() {
-    const entries = Object.entries(this.memory);
+  setHabits(habits) {
+    this.habits = habits;
+  }
 
-    if (entries.length === 0) {
-      return "";
-    }
+  setPhrases(phrases) {
+    this.phrases = phrases;
+  }
 
-    return entries.map(([key, value]) => `- ${key}: ${value}`).join("\n");
+  setExamples(examples) {
+    this.examples = examples;
+  }
+
+  addExample(example) {
+    this.examples.push(example);
+  }
+
+  updateProfile(data) {
+    Object.assign(this.profile, data);
+  }
+
+  updateStyle(data) {
+    Object.assign(this.style, data);
+  }
+
+  updateHabits(data) {
+    Object.assign(this.habits, data);
+  }
+
+  updatePhrases(data) {
+    Object.assign(this.phrases, data);
+  }
+
+  clearExamples() {
+    this.examples = [];
   }
 }
 

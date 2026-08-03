@@ -2,11 +2,24 @@ const { GRAPHQL } = require("./constants");
 const { parseGraphQLResponse } = require("./parser");
 
 let messageRequest = null;
+let requestHandler = null;
 
 async function fetchMessages(page) {
   messageRequest = null;
 
-  page.on("request", (request) => {
+  // Remove any previous listener
+  if (requestHandler) {
+    page.off("request", requestHandler);
+  }
+
+  requestHandler = (request) => {
+    // Already captured
+    if (messageRequest) {
+      page.off("request", requestHandler);
+      requestHandler = null;
+      return;
+    }
+
     if (!request.url().includes("/api/graphql")) return;
 
     const params = new URLSearchParams(request.postData() || "");
@@ -22,7 +35,13 @@ async function fetchMessages(page) {
     };
 
     console.log("Captured IGDMessageListOffMsysQuery");
-  });
+
+    // Stop listening forever.
+    page.off("request", requestHandler);
+    requestHandler = null;
+  };
+
+  page.on("request", requestHandler);
 }
 
 function getMessageRequest() {
@@ -36,15 +55,13 @@ async function triggerMessageRequest(page) {
 
   while (!messageRequest) {
     await chat.hover();
-
     await page.mouse.wheel(0, -800);
-
     await page.waitForTimeout(300);
   }
 
   console.log("GraphQL request captured automatically.");
 
-  // Scroll back to the latest messages
+  // Return to newest messages
   for (let i = 0; i < 8; i++) {
     await page.mouse.wheel(0, 1200);
     await page.waitForTimeout(100);
@@ -76,6 +93,21 @@ async function executeGraphQL(page, requestInfo, form) {
       form,
     },
   );
+}
+
+async function loadLatest20Messages(page, requestInfo) {
+  const form = { ...requestInfo.form };
+  console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++");
+  console.log(JSON.parse(requestInfo.form.variables));
+  const result = await executeGraphQL(page, requestInfo, form);
+
+  const json = JSON.parse(result.replace("for (;;);", ""));
+
+  const { messages } = parseGraphQLResponse(json);
+
+  messages.sort((a, b) => a.timestamp - b.timestamp);
+
+  return messages.map(({ timestamp, ...message }) => message);
 }
 
 async function loadMessages(page, requestInfo, pages = 3) {
@@ -119,5 +151,6 @@ module.exports = {
   getMessageRequest,
   triggerMessageRequest,
   executeGraphQL,
+  loadLatest20Messages,
   loadMessages,
 };

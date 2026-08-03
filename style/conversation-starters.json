@@ -1,0 +1,136 @@
+{
+  "morning": {
+    "time": ["07:00", "09:00"],
+    "chance": 0.45,
+    "messages": [
+      { "text": "Gm", "weight": 10 },
+      { "text": "Endhirichitiya", "weight": 9 },
+      { "text": "College poitiya", "weight": 7 },
+      { "text": "Enna plan innaiku", "weight": 6 },
+      { "text": "Class ah", "weight": 8 },
+      { "text": "Sapdala morning", "weight": 5 },
+      { "text": "Thoongitiya nalla", "weight": 4 }
+    ]
+  },
+
+  "lunch": {
+    "time": ["11:45", "12:30"],
+    "chance": 0.8,
+    "messages": [
+      { "text": "Saptiya", "weight": 10 },
+      { "text": "Enna sapta", "weight": 7 },
+      { "text": "Lunch aacha", "weight": 6 },
+      { "text": "Busy ah", "weight": 5 },
+      { "text": "Work ah illa class ah", "weight": 4 },
+      { "text": "Rest eduthiya", "weight": 3 }
+    ]
+  },
+
+  "evening": {
+    "time": ["17:00", "19:00"],
+    "chance": 0.75,
+    "messages": [
+      { "text": "Enna pandra", "weight": 10 },
+      { "text": "Saptiya", "weight": 8 },
+      { "text": "evening enna plan", "weight": 7 },
+      { "text": "Free ah irrukiya?", "weight": 6 },
+      { "text": "Enga irruka", "weight": 4 },
+      { "text": "Free ah ippo", "weight": 6 },
+      { "text": "Innaiku epdi pochu", "weight": 5 }
+    ]
+  },
+
+  "dinner": {
+    "time": ["19:00", "22:00"],
+    "chance": 0.4,
+    "messages": [
+      { "text": "Saptiya", "weight": 10 },
+      { "text": "Enna dinner", "weight": 6 },
+      { "text": "Seri ipo enna panra", "weight": 5 },
+      { "text": "Movie pakriya", "weight": 3 },
+      { "text": "Assignment mudichita", "weight": 2 },
+      { "text": "Tired ah", "weight": 4 }
+    ]
+  },
+
+  "night": {
+    "time": ["22:00", "24:00"],
+    "chance": 0.35,
+    "messages": [
+      { "text": "Thoonga poriya", "weight": 8 },
+      { "text": "Gn", "weight": 10 },
+      { "text": "Innum thoongalaya", "weight": 7 },
+      { "text": "Late ah work ah", "weight": 4 },
+      { "text": "Alarm vechitiya", "weight": 2 }
+    ]
+  },
+
+  "idle": {
+    "hoursWithoutChat": 2,
+    "chance": 0.6,
+    "messages": [
+      { "text": "Enna aalaye kaanom", "weight": 5 },
+      { "text": "Busy ah", "weight": 6 },
+      { "text": "Alive ah 😂", "weight": 3 },
+      { "text": "Enna pandringa", "weight": 7 },
+      { "text": "Innaiku romba busy pola", "weight": 2 },
+      { "text": "-_-", "weight": 4 }
+    ]
+  },
+
+  "random": {
+    "chance": 0.2,
+    "messages": [
+      { "text": "Enna pandra", "weight": 10 },
+      { "text": "Sollu", "weight": 4 },
+      { "text": "Dei", "weight": 3 },
+      { "text": "Enna news", "weight": 4 },
+      { "text": "Ennachu", "weight": 4 },
+      { "text": "Bore adikuthu", "weight": 2 },
+      { "text": "Ipo dha free aanen", "weight": 3 },
+      { "text": "Ethachum update", "weight": 4 },
+      { "text": "Enna special", "weight": 3 }
+    ]
+  },
+
+  "caring": {
+    "chance": 0.25,
+    "messages": [
+      { "text": "Sapdu first", "weight": 7 },
+      { "text": "Water kudichiya", "weight": 4 },
+      { "text": "Rest edu", "weight": 5 },
+      { "text": "Over work pannadha", "weight": 3 },
+      { "text": "Nalla thoongu", "weight": 4 },
+      { "text": "Health paathuko", "weight": 3 }
+    ]
+  },
+
+  "college": {
+    "chance": 0.25,
+    "messages": [
+      { "text": "Class ah", "weight": 7 },
+      { "text": "Attendance scene enna", "weight": 3 },
+      { "text": "Lab mudincha", "weight": 3 },
+      { "text": "Assignment anupiya", "weight": 3 },
+      { "text": "Internal epdi pochu", "weight": 2 },
+      { "text": "Exam prepare panriya", "weight": 2 }
+    ]
+  },
+
+  "casual": {
+    "chance": 0.2,
+    "messages": [
+      { "text": "Reel anupu", "weight": 5 },
+      { "text": "Meme paatha", "weight": 4 },
+      { "text": "Game variya", "weight": 2 },
+      { "text": "Call pannalama", "weight": 2 },
+      { "text": "Voice note anupu", "weight": 2 }
+    ]
+  },
+
+  "settings": {
+    "minGapHours": 3,
+    "maxPerDay": 4,
+    "dontRepeatWithinDays": 7
+  }
+}

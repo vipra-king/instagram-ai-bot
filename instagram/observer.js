@@ -1,88 +1,89 @@
-async function watchNewMessages(page, friendName, onMessage) {
+async function watchNewMessages(page, onMessage) {
   await page.exposeFunction("onInstagramMessage", async (message) => {
     await onMessage(message);
   });
 
-  await page.evaluate((friendName) => {
+  await page.evaluate(() => {
     const chat = document.querySelector('[data-pagelet="IGDMessagesList"]');
 
     if (!chat) return;
 
-    // Remember messages we've already emitted
-    const seen = new Set();
+    let debounceTimer = null;
+    let lastFingerprint = "";
 
-    function parseMessage(group) {
-      const allTexts = [...group.querySelectorAll("*")]
+    function parseGroup(group) {
+      const texts = [...group.querySelectorAll("*")]
         .map((n) => n.textContent?.trim())
         .filter(Boolean);
 
-      const unique = [...new Set(allTexts)];
-
-      const hasProfile = !!group.querySelector('a[href^="/"]');
+      const unique = [...new Set(texts)];
 
       if (unique.length === 0) return null;
 
-      let message;
+      const hasProfile = !!group.querySelector('a[href^="/"]');
+
+      let text = "";
+      let replyTo = null;
 
       if (unique[0].startsWith("You replied to")) {
-        message = {
-          sender: "me",
-          text: unique.at(-1),
-          replyTo: unique.length >= 3 ? unique[unique.length - 2] : null,
-        };
+        text = unique.at(-1);
+        replyTo = unique.length >= 3 ? unique.at(-2) : null;
       } else if (unique[0].includes("replied to you")) {
-        message = {
-          sender: friendName,
-          text: unique.at(-1),
-          replyTo: unique.length >= 3 ? unique[unique.length - 2] : null,
-        };
+        text = unique.at(-1);
+        replyTo = unique.length >= 3 ? unique.at(-2) : null;
       } else if (unique.length > 1) {
-        const reactedWith =
-          unique[2] && !unique[2].startsWith("IGD ") ? unique[2] : undefined;
-
-        message = {
-          sender: hasProfile ? friendName : "me",
-          text: unique[1],
-          ...(reactedWith && { reactedWith }),
-        };
+        text = unique[1];
       } else {
-        message = {
-          sender: hasProfile ? friendName : "me",
-          text: unique[0],
-        };
+        text = unique[0];
       }
 
-      return message;
+      return {
+        sender: hasProfile ? "friend" : "me",
+        text,
+        replyTo,
+      };
     }
 
-    const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        for (const node of mutation.addedNodes) {
-          if (!(node instanceof HTMLElement)) continue;
+    function getNewestMessage() {
+      const groups = [...chat.querySelectorAll('div[role="group"]')];
 
-          const group = node.matches?.('div[role="group"]')
-            ? node
-            : node.querySelector?.('div[role="group"]');
+      for (let i = groups.length - 1; i >= 0; i--) {
+        const msg = parseGroup(groups[i]);
 
-          if (!group) continue;
-
-          const message = parseMessage(group);
-
-          if (!message) continue;
-
-          // Ignore my own messages
-          if (message.sender === "me") continue;
-
-          // Ignore duplicates
-          const key = `${message.sender}:${message.text}`;
-
-          if (seen.has(key)) continue;
-
-          seen.add(key);
-
-          window.onInstagramMessage(message);
+        if (msg && msg.text) {
+          return msg;
         }
       }
+
+      return null;
+    }
+
+    const observer = new MutationObserver(() => {
+      clearTimeout(debounceTimer);
+
+      debounceTimer = setTimeout(async () => {
+        const message = getNewestMessage();
+
+        if (!message) return;
+
+        // Fingerprint
+        const fingerprint =
+          message.sender +
+          "|" +
+          message.text +
+          "|" +
+          message.replyTo +
+          "|" +
+          chat.querySelectorAll('div[role="group"]').length;
+
+        if (fingerprint === lastFingerprint) {
+          return;
+        }
+
+        lastFingerprint = fingerprint;
+
+        await window.onInstagramMessage(message);
+      }, 250);
     });
 
     observer.observe(chat, {
@@ -91,15 +92,13 @@ async function watchNewMessages(page, friendName, onMessage) {
     });
 
     window.__instagramObserver = observer;
-  }, friendName);
+  });
 }
 
 async function stopWatching(page) {
   await page.evaluate(() => {
-    if (window.__instagramObserver) {
-      window.__instagramObserver.disconnect();
-      window.__instagramObserver = null;
-    }
+    window.__instagramObserver?.disconnect();
+    window.__instagramObserver = null;
   });
 }
 

@@ -9,7 +9,7 @@ const {
 } = require("./graphql");
 
 const { sendMessage } = require("./sender");
-
+const { loadLatest20Messages } = require("./graphql");
 const { watchNewMessages, stopWatching } = require("./observer");
 
 module.exports = {
@@ -26,4 +26,5 @@ module.exports = {
 
   watchNewMessages,
   stopWatching,
+  loadLatest20Messages,
 };

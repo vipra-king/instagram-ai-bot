@@ -1,39 +1,40 @@
 require("dotenv").config();
-
+const fs = require("fs");
 const OpenAI = require("openai");
-const prompt = require("./prompt");
+const { retrieveExamples } = require("./retriever");
+const PromptBuilder = require("./prompt-builder");
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 async function generateReply(history, memory, latestMessage) {
-  const transcript = history
-    .map((message) => {
-      const speaker = message.sender === "me" ? "Me" : "Her";
-      return `${speaker}: ${message.text}`;
-    })
-    .join("\n");
-
-  const memoryPrompt = memory.toPrompt();
-
-  const response = await client.responses.create({
-    model: "gpt-5.4-mini",
-    input: `${prompt}
-
-${memoryPrompt}
-
-Conversation so far:
-
-${transcript}
-
-Latest message:
-Her: ${latestMessage.text}
-
-Reply as Me with only the next Instagram message.`,
+  const relevantExamples = retrieveExamples(latestMessage, memory.examples, 5);
+  console.log(
+    "Retrieved Examples:",
+    relevantExamples.map((e) => e.category),
+  );
+  const prompt = PromptBuilder.build({
+    history,
+    latestMessage,
+    profile: memory.profile,
+    style: memory.style,
+    habits: memory.habits,
+    phrases: memory.phrases,
+    examples: relevantExamples,
   });
+  fs.writeFileSync("last-prompt.txt", prompt);
+  try {
+    const response = await client.responses.create({
+      model: "gpt-5.4-mini",
+      input: prompt,
+    });
 
-  return response.output_text.trim();
+    return response.output_text.trim();
+  } catch (err) {
+    console.error("OpenAI Error:", err);
+    throw err;
+  }
 }
 
 module.exports = {

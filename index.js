@@ -14,6 +14,7 @@ const {
 const {
   Conversation,
   History,
+  MessageQueue,
   Memory,
   ContextEngine,
   waitToReply,
@@ -21,15 +22,25 @@ const {
 
 const { generateReply } = require("./ai");
 
+// Profile
 const profile = require("./profiles/informal-girl");
+
+// Style
+const style = require("./style/vipra-style.json");
+const habits = require("./style/vipra-habits.json");
+const phrases = require("./style/vipra-phrases.json");
+const examples = require("./style/vipra-examples.json");
 
 async function main() {
   const { page } = await launchInstagram();
 
+  // Capture GraphQL once
   await fetchMessages(page);
 
+  // Open chat
   await openChat(page, "informal girl");
 
+  // Capture request and load history
   await triggerMessageRequest(page);
 
   const request = getMessageRequest();
@@ -38,66 +49,90 @@ async function main() {
 
   console.log(`Loaded ${previousMessages.length} messages`);
 
+  // -----------------------------
+  // Conversation
+  // -----------------------------
+
   const conversation = new Conversation();
   conversation.addMany(previousMessages);
 
   const history = new History(conversation);
 
-  const memory = new Memory(profile);
+  // -----------------------------
+  // Memory
+  // -----------------------------
+
+  const memory = new Memory({
+    profile,
+    style,
+    habits,
+    phrases,
+    examples,
+  });
+
+  // -----------------------------
+  // Queue
+  // -----------------------------
+
+  const queue = new MessageQueue(2000);
 
   let isProcessing = false;
 
   console.log("Watching for new messages...");
 
-  await watchNewMessages(page, "subi", async (message) => {
-    // Ignore duplicate messages
+  await watchNewMessages(page, async (message) => {
+    // Ignore duplicate DOM events
     if (!conversation.add(message)) {
       return;
     }
 
-    // Ignore messages sent by me
+    // Ignore my own messages
     if (message.sender === "me") {
       return;
     }
 
-    // Don't process another message while AI is replying
-    if (isProcessing) {
-      console.log("Already processing a message. Ignoring...");
-      return;
-    }
+    queue.add(message, async (messages) => {
+      if (isProcessing) return;
 
-    isProcessing = true;
+      isProcessing = true;
 
-    try {
-      console.log("New message received!");
-      console.log(message);
+      try {
+        const latest = messages.at(-1);
 
-      console.log(`Conversation contains ${conversation.size()} messages`);
+        console.log("================================");
+        console.log(`${messages.length} new message(s)`);
 
-      const context = ContextEngine.build(history, message);
+        messages.forEach((m) => console.log(m));
 
-      const reply = await generateReply(context, memory, message);
+        console.log(`Conversation contains ${conversation.size()} messages`);
 
-      console.log("AI Reply:");
-      console.log(reply);
+        const context = ContextEngine.build(history, latest);
 
-      await waitToReply(message.text, reply);
+        const reply = await generateReply(context, memory, latest, messages);
 
-      await sendMessage(page, reply);
+        console.log("AI Reply:");
+        console.log(reply);
 
-      console.log("Reply sent.");
+        await waitToReply(latest.text, reply);
 
-      // Save AI reply locally
-      conversation.add({
-        id: `local-${Date.now()}`,
-        sender: "me",
-        text: reply,
-      });
-    } catch (error) {
-      console.error("AI Error:", error);
-    } finally {
-      isProcessing = false;
-    }
+        await sendMessage(page, reply);
+
+        conversation.add({
+          id: `local-${Date.now()}`,
+          sender: "me",
+          text: reply,
+        });
+
+        console.log("Reply sent.");
+
+        // Don't add a fake local message.
+        // Instagram will render it in the DOM.
+      } catch (error) {
+        console.error("AI Error:", error);
+      } finally {
+        isProcessing = false;
+      }
+    });
   });
 
   page.on("close", () => {

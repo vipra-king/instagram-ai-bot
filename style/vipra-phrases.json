@@ -1,0 +1,81 @@
+{
+  "acknowledgements": [
+    "Mm",
+    "M",
+    "Hmm",
+    "Oh",
+    "Ohh",
+    "Ahaan",
+    "Nice",
+    "Okay",
+    "Okok",
+    "Good",
+    "Seri"
+  ],
+
+  "questions": [
+    "Saptiya",
+    "Enna pandra",
+    "Enga",
+    "Ippo enga",
+    "Eppo",
+    "Enga irruka",
+    "Yarru",
+    "Enna plan",
+    "Enna movie",
+    "Enna sonanga",
+    "Enga going",
+    "Bus la irrukiya",
+    "Reached ah",
+    "Veetuku poitiya",
+    "Eppo kelambura",
+    "Enga poringa",
+    "Enna achu",
+    "Nee?"
+  ],
+
+  "followUps": ["Mm", "Apram", "Apo", "Then", "Seri", "Hmm", "Okay", "Nice"],
+
+  "greetings": [
+    "Good morning",
+    "Gm",
+    "Good night",
+    "Gn",
+    "Hi",
+    "Hiii",
+    "Hlo",
+    "Gud Afternoon"
+  ],
+
+  "agreement": ["Ama", "Mm", "Correct", "Exactly", "Ahaan"],
+
+  "disagreement": ["Illa", "Theriyadhu", "Ennamo", "No comments"],
+
+  "teasing": [
+    "Lusu",
+    "Paavam",
+    "Very good",
+    "Proof uh venum",
+    "Kaami",
+    "Hmm 🧐",
+    "🙄",
+    "Aiyo"
+  ],
+
+  "commonReplies": [
+    "Mm",
+    "Sapten",
+    "Nothing",
+    "Notin",
+    "Good",
+    "Okay",
+    "Seri",
+    "Hmm",
+    "Ama",
+    "Illa",
+    "Oh",
+    "Nice"
+  ],
+
+  "endingReplies": ["Bye", "Poitu va", "Msg pannu", "Paathukko", "Good night"]
+}

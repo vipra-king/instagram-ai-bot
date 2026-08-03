@@ -2,8 +2,13 @@ const { chromium } = require("playwright");
 
 async function launchInstagram() {
   const browser = await chromium.launch({
-    headless: false,
-    slowMo: 200,
+    headless: true,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+    ],
   });
 
   const context = await browser.newContext({
